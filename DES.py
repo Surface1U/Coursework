@@ -323,7 +323,7 @@ class MyDES:
 
 
 if __name__ == '__main__':
-    key = "hahahha"
+    key = "hyi"
     md = MyDES()
     print('Зашифрованные данные DES:' + md.encode("junebao.top", key))
     print('Расшифрованные данные:' + md.decode("0xbe6bd189b78e6c840x47274f078cdce00b", key))
