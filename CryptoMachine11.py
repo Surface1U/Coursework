@@ -8,26 +8,27 @@ class KeyDict(dict):
         for key in keys:
             self[key] = value
 
+
 class Main_window():
     def reverse(self, num):
-        return "".join(reversed([num[i:i+2] for i in range(0, len(num), 2)]))
-    
+        return "".join(reversed([num[i:i + 2] for i in range(0, len(num), 2)]))
+
     def little_endian(self, num):
         res = ''
-        for pack in reversed(range(0,len(num),8)):
-            res = res + num[pack:pack+8]
+        for pack in reversed(range(0, len(num), 8)):
+            res = res + num[pack:pack + 8]
         return self.reverse(res)
 
     def encrypt_ecb(self, input):
         input = input.zfill(16)
 
-        A = int(input[ 8:16],16)
-        B = int(input[ 0: 8],16)
+        A = int(input[8:16], 16)
+        B = int(input[0: 8], 16)
 
         s_box = self.s_box
 
         d = KeyDict()
-        d.keylist(('1',  '9', '17', '32'), self.K1) #dictionary of subkeys
+        d.keylist(('1', '9', '17', '32'), self.K1)  # dictionary of subkeys
         d.keylist(('2', '10', '18', '31'), self.K2)
         d.keylist(('3', '11', '19', '30'), self.K3)
         d.keylist(('4', '12', '20', '29'), self.K4)
@@ -36,29 +37,29 @@ class Main_window():
         d.keylist(('7', '15', '23', '26'), self.K7)
         d.keylist(('8', '16', '24', '25'), self.K8)
 
-        for index in range(1,33):
+        for index in range(1, 33):
 
             key = (d[str(index)])
 
             F = bin(((A + key) & int('FFFFFFFF', 16)))[2:].zfill(32)
 
-            F1 = s_box[0][int(F[28:32],2)]
-            F2 = s_box[1][int(F[24:28],2)]
-            F3 = s_box[2][int(F[20:24],2)]
-            F4 = s_box[3][int(F[16:20],2)]
-            F5 = s_box[4][int(F[12:16],2)]
-            F6 = s_box[5][int(F[ 8:12],2)]
-            F7 = s_box[6][int(F[ 4: 8],2)]
-            F8 = s_box[7][int(F[ 0: 4],2)]
+            F1 = s_box[0][int(F[28:32], 2)]
+            F2 = s_box[1][int(F[24:28], 2)]
+            F3 = s_box[2][int(F[20:24], 2)]
+            F4 = s_box[3][int(F[16:20], 2)]
+            F5 = s_box[4][int(F[12:16], 2)]
+            F6 = s_box[5][int(F[8:12], 2)]
+            F7 = s_box[6][int(F[4: 8], 2)]
+            F8 = s_box[7][int(F[0: 4], 2)]
 
             F = F8 + F7 + F6 + F5 + F4 + F3 + F2 + F1
             F = F[11:32] + F[0:11]
 
-            if index != 32 :
-                An = int(F,2) ^ B
+            if index != 32:
+                An = int(F, 2) ^ B
                 Bn = A
-            else :
-                Bn = int(F,2) ^ B
+            else:
+                Bn = int(F, 2) ^ B
                 An = A
 
             A = An
@@ -71,70 +72,67 @@ class Main_window():
 
         data = text
 
-        k = des("12345678", ECB, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+        k = des("DECRYPTE", ECB, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
         d = k.encrypt(data)
-        return d
-        #print("Decrypted: %r" % k.decrypt(d))
-        assert k.decrypt(d, padmode=PAD_PKCS5) == data
+        return self.result_text.insert(1.0,str(d))
+        # print("Decrypted: %r" % k.decrypt(d))
 
     def encrypt_DES_CBC(self, text):
 
         data = text
-        k = des("12345678", CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+        k = des("DECRYPTE", CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
         d = k.encrypt(data)
-        return d
-        #print("Decrypted: %r" % k.decrypt(d))
-        #assert k.decrypt(d, padmode=PAD_PKCS5) == data
+        return self.result_text.insert(1.0,str(d))
+        # print("Decrypted: %r" % k.decrypt(d))
+        # assert k.decrypt(d, padmode=PAD_PKCS5) == data
 
-    def decrypt_DES_CBC(self, text,key):
+    def decrypt_DES_CBC(self, text):
 
         data = text
-        k = des(key, CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
-        d = k.encrypt(data)
-        return k.decrypt(d)
-        assert k.decrypt(d, padmode=PAD_PKCS5) == data
+        k = des('DECRYPT', CBC, "\0\0\0\0\0\0\0\0", pad=None, padmode=PAD_PKCS5)
+        return k.decrypt(data)
+        # assert k.decrypt(data, padmode=PAD_PKCS5) == data
 
     def decrypt_ecb(self, input):
         input = input.zfill(16)
 
-        A = int(input[ 8:16],16)
-        B = int(input[ 0: 8],16)
+        A = int(input[8:16], 16)
+        B = int(input[0: 8], 16)
 
         s_box = self.s_box
 
         d = KeyDict()
-        d.keylist(('1', '16', '24', '32'), self.K1) #dictionary of subkeys
+        d.keylist(('1', '16', '24', '32'), self.K1)  # dictionary of subkeys
         d.keylist(('2', '15', '23', '31'), self.K2)
         d.keylist(('3', '14', '22', '30'), self.K3)
         d.keylist(('4', '13', '21', '29'), self.K4)
         d.keylist(('5', '12', '20', '28'), self.K5)
         d.keylist(('6', '11', '19', '27'), self.K6)
         d.keylist(('7', '10', '18', '26'), self.K7)
-        d.keylist(('8',  '9', '17', '25'), self.K8)
+        d.keylist(('8', '9', '17', '25'), self.K8)
 
-
-        for index in range(1,33):
+        for index in range(1, 33):
             key = (d[str(index)])
 
             F = bin(((A + key) & int('FFFFFFFF', 16)))[2:].zfill(32)
 
-            F1 = s_box[0][int(F[28:32],2)]
-            F2 = s_box[1][int(F[24:28],2)]
-            F3 = s_box[2][int(F[20:24],2)]
-            F4 = s_box[3][int(F[16:20],2)]
-            F5 = s_box[4][int(F[12:16],2)]
-            F6 = s_box[5][int(F[ 8:12],2)]
-            F7 = s_box[6][int(F[ 4: 8],2)]
-            F8 = s_box[7][int(F[ 0: 4],2)]
+            F1 = s_box[0][int(F[28:32], 2)]
+            F2 = s_box[1][int(F[24:28], 2)]
+            F3 = s_box[2][int(F[20:24], 2)]
+            F4 = s_box[3][int(F[16:20], 2)]
+            F5 = s_box[4][int(F[12:16], 2)]
+            F6 = s_box[5][int(F[8:12], 2)]
+            F7 = s_box[6][int(F[4: 8], 2)]
+            F8 = s_box[7][int(F[0: 4], 2)]
 
             F = F8 + F7 + F6 + F5 + F4 + F3 + F2 + F1
             F = F[11:32] + F[0:11]
 
             if index != 32:
-                An = int(F,2) ^ B
+                An = int(F, 2) ^ B
                 Bn = A
             else:
-                Bn = int(F,2) ^ B
+                Bn = int(F, 2) ^ B
                 An = A
 
             A = An
@@ -152,27 +150,27 @@ class Main_window():
 
         self.s_box = [[] for _ in range(8)]
 
-        for index in range(0,16) :
-            for row in range(0,8) :
-                self.s_box[row].append(bin(int(s_box_input[index*2 + 32*row],16))[2:].zfill(4))
+        for index in range(0, 16):
+            for row in range(0, 8):
+                self.s_box[row].append(bin(int(s_box_input[index * 2 + 32 * row], 16))[2:].zfill(4))
 
         key = self.reverse(self.key_var.get()[0:64])
 
-        self.K8 = int(key[ 0: 8],16)
-        self.K7 = int(key[ 8:16],16)
-        self.K6 = int(key[16:24],16)
-        self.K5 = int(key[24:32],16)
-        self.K4 = int(key[32:40],16)
-        self.K3 = int(key[40:48],16)
-        self.K2 = int(key[48:56],16)
-        self.K1 = int(key[56:64],16)
+        self.K8 = int(key[0: 8], 16)
+        self.K7 = int(key[8:16], 16)
+        self.K6 = int(key[16:24], 16)
+        self.K5 = int(key[24:32], 16)
+        self.K4 = int(key[32:40], 16)
+        self.K3 = int(key[40:48], 16)
+        self.K2 = int(key[48:56], 16)
+        self.K1 = int(key[56:64], 16)
 
         input = self.base_text.get(1.0, END)[:-1]
 
         if self.method_var.get() == 'GOST - ECB mode':
             output = ''
-            for block_num in range ((len(input[:-1])//16)+1):
-                output = output + self.encrypt_ecb(input[0+block_num*16:16+block_num*16])
+            for block_num in range((len(input[:-1]) // 16) + 1):
+                output = output + self.encrypt_ecb(input[0 + block_num * 16:16 + block_num * 16])
 
             self.result_text.insert(1.0, output)
             return output
@@ -182,27 +180,27 @@ class Main_window():
 
             result = self.encrypt_ecb(iv)
 
-            C2 = int('01010104',16)
-            C1 = int('01010101',16)
+            C2 = int('01010104', 16)
+            C1 = int('01010101', 16)
 
-            N4 = int(result[ 0: 8],16)
-            N3 = int(result[ 8:16],16)
-            N4 =  (N4 + C2)     & int("FFFFFFFF", 16)
+            N4 = int(result[0: 8], 16)
+            N3 = int(result[8:16], 16)
+            N4 = (N4 + C2) & int("FFFFFFFF", 16)
             N3 = ((N3 + C1 - 1) % int("FFFFFFFF", 16)) + 1
             N1 = N3
             N2 = N4
 
             gamma = self.encrypt_ecb(hex(N2 << 32 | N1)[2:].zfill(16))
-            gamma = gamma[ 8:16] + gamma[ 0: 8]
+            gamma = gamma[8:16] + gamma[0: 8]
 
             if input == '':
                 input = '0'
             input = self.little_endian(input)
 
-            output = hex((int(input,16)) ^ (int(gamma,16)))[2:].zfill(16)
+            output = hex((int(input, 16)) ^ (int(gamma, 16)))[2:].zfill(16)
 
-            N1 = output[ 0: 8]
-            N2 = output[ 8:16]
+            N1 = output[0: 8]
+            N2 = output[8:16]
 
             output = self.little_endian(output)
 
@@ -210,19 +208,13 @@ class Main_window():
             return output
 
         if self.method_var.get() == 'DES - ECB mode':
-            output = self.encrypt_DES_ECB(input)
-
-            self.result_text.insert(1.0, output)
-            return output
+            self.encrypt_DES_ECB(input)
 
         if self.method_var.get() == 'DES - CBC mode':
             output = self.encrypt_DES_CBC(input)
 
             self.result_text.insert(1.0, output)
             return output
-
-
-
 
     def decrypt(self):
         self.result_text.delete(1.0, END)
@@ -233,37 +225,40 @@ class Main_window():
 
         self.s_box = [[] for _ in range(8)]
 
-        for index in range(0,16) :
-            for row in range(0,8) :
-                self.s_box[row].append(bin(int(s_box_input[index*2 + 32*row],16))[2:].zfill(4))
+        for index in range(0, 16):
+            for row in range(0, 8):
+                self.s_box[row].append(bin(int(s_box_input[index * 2 + 32 * row], 16))[2:].zfill(4))
 
         key = self.reverse(self.key_var.get()[0:64])
 
-        self.K8 = int(key[ 0: 8],16)
-        self.K7 = int(key[ 8:16],16)
-        self.K6 = int(key[16:24],16)
-        self.K5 = int(key[24:32],16)
-        self.K4 = int(key[32:40],16)
-        self.K3 = int(key[40:48],16)
-        self.K2 = int(key[48:56],16)
-        self.K1 = int(key[56:64],16)
+        self.K8 = int(key[0: 8], 16)
+        self.K7 = int(key[8:16], 16)
+        self.K6 = int(key[16:24], 16)
+        self.K5 = int(key[24:32], 16)
+        self.K4 = int(key[32:40], 16)
+        self.K3 = int(key[40:48], 16)
+        self.K2 = int(key[48:56], 16)
+        self.K1 = int(key[56:64], 16)
 
         input = self.base_text.get(1.0, END)[:-1]
 
         if self.method_var.get() == 'GOST - ECB mode':
             output = ''
-            for block_num in range ((len(input[:-1])//16)+1):
-                output = output + self.decrypt_ecb(input[0+block_num*16:16+block_num*16])
+            for block_num in range((len(input[:-1]) // 16) + 1):
+                output = output + self.decrypt_ecb(input[0 + block_num * 16:16 + block_num * 16])
             self.result_text.insert(1.0, output)
             return output
         if self.method_var.get() == 'GOST - CNT mode':
             self.encrypt()
-        if self.method_var.get() == 'DES - ECB mode':
-            self.decrypt_DES_CBC()
+        if self.method_var.get() == 'DES - CBC mode':
+            output = self.decrypt_DES_CBC(input)
+
+            self.result_text.insert(1.0, output)
+            return output
 
     def copy(self):
         self.window.clipboard_clear()
-        self.window.clipboard_append(self.result_text.get("1.0","end-1c"))
+        self.window.clipboard_append(self.result_text.get("1.0", "end-1c"))
 
     def __init__(self):
         self.window = Tk()
@@ -271,31 +266,31 @@ class Main_window():
 
         self.window.title('CryptoMachine')
         frame = ttk.Frame(self.window, padding='5 5 5 5')
-        frame.grid(column=0, row=0, sticky=(N,W,E,S))
+        frame.grid(column=0, row=0, sticky=(N, W, E, S))
 
         self.method_var = StringVar()
-        self.s_box_var  = StringVar()
-        self.key_var    = StringVar()
-        self.iv_var     = StringVar()
-        self.base_var   = StringVar()
+        self.s_box_var = StringVar()
+        self.key_var = StringVar()
+        self.iv_var = StringVar()
+        self.base_var = StringVar()
 
         self.method_var.set('CHOOSE MODE')
         self.s_box_var.set('id-Gost28147-89-CryptoPro-A-ParamSet')
         self.key_var.set('A0C84911FEB6AA546950EC7C532750464C77FAF35C071F47A457DDD152EE7DD0')
         self.iv_var.set('71EF0B1F3BE0394F')
 
-        self.s_box_dict = { 'id-Gost28147-89-CryptoPro-A-ParamSet' : 'S_box/box_a',
-                            'id-GostR3411-94-TestParamSet'         : 'S_box/box_t',
-                            'id-tc26-gost-28147-param-Z'           : 'S_box/box_z'
-        }
+        self.s_box_dict = {'id-Gost28147-89-CryptoPro-A-ParamSet': 'S_box/box_a',
+                           'id-GostR3411-94-TestParamSet': 'S_box/box_t',
+                           'id-tc26-gost-28147-param-Z': 'S_box/box_z'
+                           }
 
-        grid_row        = 0
-        grid_pady       = 5
+        grid_row = 0
+        grid_pady = 5
         grid_text_hight = 4
-        text_width      = 52
+        text_width = 52
 
-        ttk.Label(frame, text='Encryption mode').\
-        grid(
+        ttk.Label(frame, text='Encryption mode'). \
+            grid(
             row=grid_row,
             column=0,
             sticky='W',
@@ -314,8 +309,8 @@ class Main_window():
             padx=5,
             pady=grid_pady)
 
-        ttk.Label(frame, text='S-box').\
-        grid(
+        ttk.Label(frame, text='S-box'). \
+            grid(
             row=grid_row,
             column=2,
             sticky='W',
@@ -326,8 +321,8 @@ class Main_window():
             textvariable=self.s_box_var,
             values=list(self.s_box_dict.keys()),
             state='readonly',
-            width=36).\
-        grid(
+            width=36). \
+            grid(
             row=grid_row,
             column=3,
             sticky='W',
@@ -336,14 +331,14 @@ class Main_window():
 
         grid_row += 1
 
-        ttk.Label(frame, text='Encryption key').\
-        grid(
+        ttk.Label(frame, text='Encryption key'). \
+            grid(
             row=grid_row,
             column=0,
             sticky='W',
             pady=grid_pady)
-        ttk.Entry(frame, textvariable=self.key_var, width=30).\
-        grid(
+        ttk.Entry(frame, textvariable=self.key_var, width=30). \
+            grid(
             row=grid_row,
             column=1,
             columnspan=3,
@@ -353,8 +348,8 @@ class Main_window():
 
         grid_row += 1
 
-        ttk.Label(frame, text='Initialization vector').\
-        grid(
+        ttk.Label(frame, text='Initialization vector'). \
+            grid(
             row=grid_row,
             column=0,
             sticky='W',
@@ -369,13 +364,13 @@ class Main_window():
             pady=grid_pady)
 
         enc_method.bind("<<ComboboxSelected>>", lambda event: \
-            iv_entry.config(state='normal') if self.method_var.get() == 'CNT mode'\
-            else iv_entry.config(state='disabled'))
+            iv_entry.config(state='normal') if self.method_var.get() == 'CNT mode' \
+                else iv_entry.config(state='disabled'))
 
         grid_row += 1
 
-        ttk.Label(frame, text='Input text: 0x').\
-        grid(
+        ttk.Label(frame, text='Input text: 0x'). \
+            grid(
             row=grid_row,
             column=0,
             sticky='W',
@@ -393,8 +388,8 @@ class Main_window():
             padx=5,
             pady=grid_pady)
 
-        ttk.Button(frame, text='Encrypt', width=20, command=lambda: self.encrypt()).\
-        grid(
+        ttk.Button(frame, text='Encrypt', width=20, command=lambda: self.encrypt()). \
+            grid(
             row=grid_row,
             column=3,
             sticky='NES',
@@ -403,8 +398,8 @@ class Main_window():
 
         grid_row += 1
 
-        ttk.Button(frame, text='Decrypt', width=20, command=lambda: self.decrypt()).\
-        grid(
+        ttk.Button(frame, text='Decrypt', width=20, command=lambda: self.decrypt()). \
+            grid(
             row=grid_row,
             column=3,
             sticky='NES',
@@ -413,8 +408,8 @@ class Main_window():
 
         grid_row += grid_text_hight + 1
 
-        ttk.Label(frame, text='Result: 0x').\
-        grid(
+        ttk.Label(frame, text='Result: 0x'). \
+            grid(
             row=grid_row,
             column=0,
             sticky='W',
@@ -430,14 +425,15 @@ class Main_window():
             columnspan=4,
             sticky='NWS',
             padx=5,
-            pady=(grid_pady,grid_pady+5))
+            pady=(grid_pady, grid_pady + 5))
 
-        ttk.Button(frame, text='Copy to clipboard', width=20, command=lambda: self.copy()).\
-        grid(
+        ttk.Button(frame, text='Copy to clipboard', width=20, command=lambda: self.copy()). \
+            grid(
             row=grid_row,
             column=3,
             sticky='NE',
             padx=5,
             pady=grid_pady)
+
 
 Main_window().window.mainloop()
