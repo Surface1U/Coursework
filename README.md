@@ -10,3 +10,7 @@
 
 
 ![image](https://user-images.githubusercontent.com/60102276/193322381-eb8b2762-ad73-4626-a46f-7d268e00e88f.png)
+
+#День 2344242 + 1.  Нормально шифрует DES
+
+![image](https://user-images.githubusercontent.com/60102276/193395585-61d74d5f-8aa3-41f1-9777-719816e4fcf0.png)
